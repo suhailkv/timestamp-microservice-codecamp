@@ -12,14 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
 app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
-function check(req,res,next){
- if(isNaN(req.params.timeStamp) && req.params.timeStamp !==undefined ){
-    console.log(req.params.timeStamp)
-    res.status(400).json({"error":"Invalid Date"})
-  }
-  next();
-}
-app.use(check);
+
 // http://expressjs.com/en/starter/static-files.html
 // app.use(express.static('public'));
 
@@ -28,34 +21,47 @@ app.use(check);
 //   res.sendFile(__dirname + '/views/index.html');
 // });
 // "utc":"Mon, 20 Jun 2022 07:40:25 GMT"
-function formattedDate(time){
-  let date;
-  if(time === undefined){
-    date = new Date()
-    }else{
-      date = new Date(time *1000)
-    }
-  const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+// function formattedDate(time){
+//   console.log(time);
+//   let date;
+//   if(time === undefined){
+//     date = new Date()
+//     }
+   
+//     else if(Object.prototype.toString.call(time) === "[object Date]"){
+//       date = new Date(time)
+//     }else{
+//     date = new Date(time * 1000)
+//     }
+//   const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+//   const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
  
 
 
-  const format ={
-    month: month[date.getMonth()],
-    d: date.getDate(),
-    y: date.getFullYear(),
-    day:weekday[date.getDay()],
-    h:date.getHours(),
-    m:date.getMinutes(),
-    s:date.getSeconds()
-  }
-  const newDate = `${format.day}, ${format.d} ${format.month} ${format.y} ${format.h}:${format.m}:${format.s} GMT`
-  return newDate;
-}
-app.get('/',(req,res)=>{
+//   const format ={
+//     month: month[date.getMonth()],
+//     d: date.getDate(),
+//     y: date.getFullYear(),
+//     day:weekday[date.getDay()],
+//     h:date.getHours(),
+//     m:date.getMinutes(),
+//     s:date.getSeconds()
+//   }
+//   const newDate = `${format.day}, ${format.d} ${format.month} ${format.y} ${format.h}:${format.m}:${format.s} GMT`
+//   return newDate;
+// }
+app.get('/api/',(req,res)=>{
+  
     res.status(200).json({"unix":+ new Date(),"utc":formattedDate()})
 })
-app.get('/:timeStamp',(req,res)=>{              res.status(200).json({"unix":req.params.timeStamp,"utc":formattedDate(req.params.timeStamp)})
+app.get('/api/:timeStamp',(req,res)=>{ 
+  let par = new Date(req.params.timeStamp)
+  if(par.toString() !== 'Invalid Date' ){
+    res.status(200).json({unix:Math.floor(par.getTime() / 1000),utc:par.toUTCString()})
+  }
+else{
+  res.status(404).json({ error : "Invalid Date" })
+}
 })
 
 
