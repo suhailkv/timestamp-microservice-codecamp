@@ -13,51 +13,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 var cors = require('cors');
 app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
 
-// http://expressjs.com/en/starter/static-files.html
-// app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
-// app.get("/", function (req, res) {
-//   res.sendFile(__dirname + '/views/index.html');
-// });
-// "utc":"Mon, 20 Jun 2022 07:40:25 GMT"
-// function formattedDate(time){
-//   console.log(time);
-//   let date;
-//   if(time === undefined){
-//     date = new Date()
-//     }
-   
-//     else if(Object.prototype.toString.call(time) === "[object Date]"){
-//       date = new Date(time)
-//     }else{
-//     date = new Date(time * 1000)
-//     }
-//   const weekday = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-//   const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
- 
-
-
-//   const format ={
-//     month: month[date.getMonth()],
-//     d: date.getDate(),
-//     y: date.getFullYear(),
-//     day:weekday[date.getDay()],
-//     h:date.getHours(),
-//     m:date.getMinutes(),
-//     s:date.getSeconds()
-//   }
-//   const newDate = `${format.day}, ${format.d} ${format.month} ${format.y} ${format.h}:${format.m}:${format.s} GMT`
-//   return newDate;
-// }
 app.get('/api/',(req,res)=>{
   
-    res.status(200).json({"unix":+ new Date(),"utc":formattedDate()})
+  const par = new Date();
+    res.status(200).json({"unix":+ par,"utc":par.toUTCString()})
 })
+
 app.get('/api/:timeStamp',(req,res)=>{ 
-  let par = new Date(req.params.timeStamp)
-  if(par.toString() !== 'Invalid Date' ){
-    res.status(200).json({unix:Math.floor(par.getTime() / 1000),utc:par.toUTCString()})
+  
+  let par = req.params.timeStamp;
+  
+   if(!isNaN(par)){     
+     par = parseInt(par);
+     
+     if(par.toString() !== 'Invalid Date' ){
+      par = new Date(par)
+      res.status(200).json({unix:Math.floor(par.getTime() ),utc:par.toUTCString()})
+  }
+    }else if(new Date(par).toString() !== 'Invalid Date' ){
+   const newDate = new Date(par);
+    res.status(200).json({unix:Math.floor(newDate.getTime() ),utc:newDate.toUTCString()})
   }
 else{
   res.status(404).json({ error : "Invalid Date" })
